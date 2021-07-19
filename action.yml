@@ -1,0 +1,22 @@
+name: "Gcloud kms decrypt"
+description: "Decrypt secret by gcloud kms decrypt"
+inputs:
+  kms-key-name:
+    description: "kms key name"
+    required: true
+  cipher-text:
+    description: "cipher text encrypted using the kms key"
+    required: true
+outputs:
+  secret:
+    description: "Secret decrypted from cipher-text using the kms key"
+    value: ${{ steps.gcloud-kms-decrypt.outputs.secret }}
+runs:
+  using: "composite"
+  steps:
+    - id: gcloud-kms-decrypt
+      run: |
+        PLAINTEXT_SECRET=$(${{ github.action_path }}/decrypt.sh ${{inputs.kms-key-name}} ${{inputs.cipher-text}})
+        echo "::add-mask::${PLAINTEXT_SECRET}"
+        echo "::set-output name=secret::${PLAINTEXT_SECRET}"
+      shell: bash
